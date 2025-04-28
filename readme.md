@@ -6,13 +6,13 @@
 This project is currently in beta and not yet available for public release. I’m actively working on polishing the final features and updating the README. Stay tuned for the official launch!
 ## 📸 Screenshots
 
-![image](https://github.com/user-attachments/assets/15c8b8e1-322e-41e0-8ef5-0b39d4d73d91)
-
+![image](https://github.com/user-attachments/assets/f3239007-c1fa-45b8-b8f9-6553618b6662)
 
 ## ✨ Features
 
 - **Interface PS5-like** : Enjoy a pleasant interface
 - **Steam integration** : Nexus works using steam
+- **Controller** : Compatible with a controller
 - **Coming soon...**
 
 ## Environment Variables
