@@ -16,7 +16,9 @@ This project is currently in beta and not yet available for public release. I’
 
 ## Environment Variables
 To run this project, you will need to set the following environment variables to your config file.
+
 `ID` - *Your steam id*
+
 `SHARED_SESSION` - ***not required** | use if you want to add shared games from your familly library.*
 
 ## 🔨 Updates
