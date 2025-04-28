@@ -6,7 +6,7 @@
 This project is currently in beta and not yet available for public release. I’m actively working on polishing the final features and updating the README. Stay tuned for the official launch!
 ## 📸 Screenshots
 
-![image](https://github.com/user-attachments/assets/dde9dd9c-56b8-4a9c-a5de-12278c1f9782)
+![image](https://github.com/user-attachments/assets/15c8b8e1-322e-41e0-8ef5-0b39d4d73d91)
 
 
 ## ✨ Features
