@@ -8,7 +8,9 @@ This project is currently in beta and not yet available for public release. I’
 ## 📸 Screenshots
 ![image](https://github.com/user-attachments/assets/df8a9487-6988-448b-859c-d689d35fb1d3)
 
+
 ## ✨ Features
+
 - **Interface PS5-like** : Enjoy a pleasant interface
 - **Steam integration** : Nexus works using steam
 - **Controller** : Compatible with a controller
