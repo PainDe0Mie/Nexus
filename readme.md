@@ -2,8 +2,8 @@
 
 >  Nexus is a PS5 like ui for steam.
 
-#### 🚧 Beta Notice
-This project is currently in beta and not yet available for public release. I’m actively working on polishing the final features and updating the README. Stay tuned for the official launch!
+#### 🚧 Project Status
+**This project is no longer actively maintained.** You may encounter bugs, compatibility issues, or non-functional features. It is kept available for archival and demonstration purposes.
 
 ## 📸 Screenshots
 ![image](https://github.com/user-attachments/assets/df8a9487-6988-448b-859c-d689d35fb1d3)
