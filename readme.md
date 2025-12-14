@@ -1,4 +1,4 @@
-# 🚀 Nexus Beta - 0.1
+# 🚀 Nexus - 0.1
 
 >  Nexus is a PS5 like ui for steam.
 
