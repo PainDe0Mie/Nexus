@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Interface PS5</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            
+            @font-face {
+                font-family: "SST Pro Light";
+                src: url("assets/fonts/SSTPro-Light.ttf");
+            }
+    
+            @font-face {
+                font-family: "SST Pro Medium";
+                src: url("assets/fonts/SSTPro-Medium.ttf");
+            }
+    
+            :root {
+                --bg-gradient: linear-gradient(145deg, #2d2f40, #1e2030);
+                --radius: 20px;
+                --padding: 16px 24px;
+                --icon-size: 28px;
+                --center-icon-size: 48px;
+                --shadow: 0 4px 10px rgba(0,0,0,0.7);
+                --show-time: 3500ms;
+                --anim-in: 0.4s ease-out;
+                --anim-out: 0.4s ease-in;
+            }
+    
+            body {
+                background-color: #000;
+                color: white;
+                overflow: hidden;
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+            }
+            
+            body.fade-ui .ps5-ui > :not(#default-bg-video):not(#app-bg-video):not(.background-img) {
+                opacity: 0;
+                transition: opacity 0.8s ease;
+            }
+    
+            /* Système de redimensionnement */
+            .ps5-wrapper {
+                position: absolute;
+                width: 1920px;
+                height: 1080px;
+                top: 50%;
+                left: 50%;
+                transform-origin: center center;
+                overflow: hidden;
+            }
+    
+            #bg-1 {
+                opacity: 0;
+                transition: opacity 0.1s cubic-bezier(0.4, 0, 0.2, 1), transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+    
+            #bg-1.show {
+                opacity: 1;
+            }
+    
+            .ps5-ui {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                outline: none;
+            }
+            
+            .ps5-ui::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 50%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 4; 
+                background: linear-gradient(
+                    to right,
+                    rgba(0, 0, 0, 0.85) 0%,
+                    rgba(0, 0, 0, 0) 100%
+                );
+            }
+    
+            .background-img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-size: cover;
+                background-position: center;
+                z-index: 0;
+                opacity: 0.8;
+                pointer-events: none;
+            }
+    
+            .background-img::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                pointer-events: none;
+            }
+            
+            .background-img.active {
+                opacity: 1;
+            }
+            
+            .background-video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0;
+                transition: opacity 0.5s ease-out;
+                z-index: 0;
+            }
+            
+            .background-video.active {
+                opacity: 1;
+            }
+            
+            .header {
+                width: 1800px;
+                padding-top: 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 10;
+            }
+            
+            .header-left {
+                display: flex;
+                align-items: center;
+            }
+            
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .time {
+                font-family: "SST Pro Light";
+                font-size: 28px;
+                color: rgba(255, 255, 255, 0.8);
+            }
+    
+            .category-button {
+                font-family: "SST Pro Light";
+                font-size: 28px;
+                color: rgba(255, 255, 255, 0.8);
+                padding-right: 50px;
+            }
+    
+            .bold-text {
+                font-family: "SST Pro Medium";
+            }
+            
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                background-color: #0072ce;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+            
+            .app-selection {
+                display: flex;
+                width: 1920px;
+                padding: 40px 0px 40px 30px;
+                position: relative;
+                z-index: 10;
+                overflow: hidden;
+            }
+            
+            .app-container {
+                display: flex;
+                transition: transform 0.25s ease;
+                position: relative;
+                left: 0;
+            }
+            
+            .app-icon-wrapper {
+                margin-left: 10px;
+                position: relative;
+            }
+            
+            .app-bg {
+                height: 120px;
+                width: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease-out;
+            }
+            
+            .app-bg.active {
+                height: 160px;
+                width: 160px;
+                background-image: url('/assets/console_UI/card.png');
+                background-size: 160px 160px;
+            }
+            
+            .app-icon {
+                height: 115px;
+                width: 115px;
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.5);
+                background-size: cover;
+                background-position: center;
+                transition: all 0.3s ease-out;
+                overflow: hidden;
+            }
+            
+            .app-bg.active .app-icon {
+                height: 150px;
+                width: 150px;
+            }
+            
+            .app-info {
+                display: none;
+                color: white;
+                text-align: left;
+                font-size: 25px;
+                position: absolute;
+                transform: translateX(185px) translateY(-35px);
+                white-space: nowrap;
+            }
+            
+            .app-bg.active + .app-info {
+                display: flex;
+                align-items: center;
+            }
+            
+            .app-type-icon {
+                height: 25px;
+                width: auto;
+                padding-right: 10px;
+            }
+            
+            .playable-area {
+                position: absolute;
+                bottom: 250px;
+                left: 110px;
+                width: 1700px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: flex-end;
+                z-index: 5;
+                animation: none;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            .game-logo {
+                max-width: 300px;
+                max-height: 200px;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+            }
+            
+            .game-subtext {
+                max-width: 775px;
+                font-size: 30px;
+                color: #ececee;
+                margin-top: 45px;
+                margin-bottom: 60px;
+            }
+            
+            .game-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 30px;
+            }
+            
+            .play-button, .overflow-button {
+                height: 75px;
+                display: flex;
+                align-items: center;
+                padding: 0 30px;
+                border-radius: 35px;
+                font-size: 26px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+            
+            .play-button {
+                background-color: rgba(37, 37, 37, 0.7);
+                color: white;
+            }
+            
+            .overflow-button {
+                background-color: rgba(37, 37, 37, 0.7);
+                color: white;
+            }
+            
+            .play-icon {
+                margin-right: 10px;
+            }
+            
+            .placeholder-img {
+                background: linear-gradient(135deg, rgba(36, 35, 35, 0.2) 0%, rgba(78, 75, 75, 0.3) 100%);
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+    
+            /* Container for notifications */
+            #notif-container {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                z-index: 9999;
+            }
+            .notification {
+                position: relative;
+                display: flex;
+                align-items: center;
+                background: var(--bg-gradient);
+                border-radius: var(--radius);
+                padding: var(--padding);
+                box-shadow: var(--shadow);
+                color: #fff;
+                min-width: 320px;
+                max-width: 400px;
+                overflow: hidden;
+                animation: slideIn var(--anim-in) forwards, slideOut var(--anim-out) var(--show-time) forwards;
+            }
+            /* Icon-only mode */
+            .notification.icon-only {
+                justify-content: center;
+                padding: 0;
+                width: var(--center-icon-size);
+                height: var(--center-icon-size);
+                min-width: auto;
+                min-height: auto;
+            }
+            .notification .center-icon {
+                width: var(--center-icon-size);
+                height: var(--center-icon-size);
+                object-fit: contain;
+                display: block;
+            }
+            /* Slide animations */
+            @keyframes slideIn {
+                from { transform: translateX(110%); opacity: 0; }
+                to   { transform: translateX(0);    opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0);    opacity: 1; }
+                to   { transform: translateX(110%); opacity: 0; }
+            }
+            /* Standard layout */
+            .notification .icon {
+                width: var(--icon-size);
+                height: var(--icon-size);
+                margin-right: 16px;
+                flex-shrink: 0;
+            }
+            .notification .icon i,
+            .notification .icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                color: #fff;
+                display: block;
+            }
+            .notification .text-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .notification .title {
+                font-size: 16px;
+                font-weight: bold;
+                opacity: 0.9;
+            }
+            .notification .description {
+                font-size: 14px;
+                opacity: 0.75;
+            }
+            .notification .logo {
+                position: absolute;
+                top: 12px;
+                right: 16px;
+                width: 24px;
+                height: 24px;
+                object-fit: contain;
+                flex-shrink: 0;
+                display: block;
+            }
+    
+            /* Contrôles de taille */
+            .size-controls {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 10px;
+                border-radius: 10px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .size-controls button {
+                background: #0072ce;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+            
+            .size-controls button:hover {
+                background: #0088ee;
+            }
+            
+            .size-controls .buttons-row {
+                display: flex;
+                gap: 5px;
+            }
+    
+            /* Ajout des media queries pour le responsive de base */
+            @media (max-width: 1920px) {
+                .ps5-wrapper {
+                    transform: translate(-50%, -50%) scale(calc(100vw/1920));
+                }
+            }
+            
+            @media (max-height: 1080px) {
+                .ps5-wrapper {
+                    transform: translate(-50%, -50%) scale(calc(100vh/1080));
+                }
+            }
+            
+            @media (max-width: 1920px) and (max-height: 1080px) {
+                .ps5-wrapper {
+                    transform: translate(-50%, -50%) scale(min(calc(100vw/1920), calc(100vh/1080)));
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous">
+</head>
+<body>
+    <div class="ps5-ui" tabindex="0">
+        
+        <!-- Background Images/Video -->
+        <video id="default-bg-video" class="background-video active" autoplay loop muted playsinline>
+            <source src="/assets/video/background2.mp4" type="video/mp4">
+            <!-- Fallback si la vidéo ne se charge pas -->
+            <div class="placeholder-img">Fond vidéo</div>
+        </video>
+        
+        <!-- Video secondaire pour les transitions fluides -->
+        <video id="app-bg-video" class="background-video" autoplay loop muted playsinline>
+            <source src="" type="video/mp4">
+        </video>
+        
+        <div class="background-img" id="bg-1"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <!-- Logo -->
+                <div class="category-button bold-text">Games</div>
+                <div class="category-button">Media</div>
+            </div>
+            <div class="header-right">
+                <div class="fas fa-search" style="font-size: 24px; padding-right: 50px;"></div>
+                <div class="fas fa-cog" style="font-size: 28px; padding-right: 50px;"></div>
+                <div class="user-avatar" style="margin-right: 40px;">P</div>
+                <div class="time" style="padding: 20px;">20:45</div>
+            </div>
+        </div>
+        
+        <!-- App Selection Bar -->
+        <div class="app-selection">
+            <div class="app-container" id="app-container">
+                <!-- PS Store Icon -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="ps-store-icon">
+                            <img class="placeholder-img" src="/assets/console_UI/PSStore.png" alt="PS-Store">
+                        </div>
+                    </div>
+                    <div class="app-info">PlayStation Store</div>
+                </div>
+                
+                <!-- PS Explore Icon -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="ps-explore-icon">
+                            <img class="placeholder-img" src="/assets/console_UI/PSExplore.png" alt="PS-Explore">
+                        </div>
+                    </div>
+                    <div class="app-info">Explore</div>
+                </div>
+                
+                <!-- Spider-Man Miles Morales -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg active">
+                        <div class="app-icon" id="spiderman-icon">
+                            <img class="placeholder-img" src="/assets/apps/spiderManMilesMorales/icon.png" alt="Spider-Man">
+                        </div>
+                    </div>
+                    <div class="app-info">
+                        <img src="/assets/apps/appType/ps5.png" width="50px" height="25px">
+                        Marvel's Spider-Man: Miles Morales
+                    </div>
+                </div>
+                
+                <!-- Ghost of Tsushima -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="got-icon">
+                            <img class="placeholder-img" src="/assets/apps/ghostOfTsushima/icon.png" alt="Ghost-of-Tsushima">
+                        </div>
+                    </div>
+                    <div class="app-info">
+                        <img src="/assets/apps/appType/ps4.png" width="50px" height="25px">
+                        Ghost of Tsushima
+                    </div>
+                </div>
+
+                <!-- NBA 2K22 -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="nba-icon">
+                            <img class="placeholder-img" src="/assets/apps/nba2k22/icon.png" alt="nba2k22">
+                        </div>
+                    </div>
+                    <div class="app-info">
+                        <img src="/assets/apps/appType/ps4.png" width="50px" height="25px">
+                        NBA 2K22
+                    </div>
+                </div>
+                
+                <!-- Destiny 2 -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="destiny-icon">
+                            <img class="placeholder-img" src="/assets/apps/destiny/icon.png" alt="destiny2">
+                        </div>
+                    </div>
+                    <div class="app-info">
+                        <img src="/assets/apps/appType/ps5.png" width="50px" height="25px">
+                        Destiny 2
+                    </div>
+                </div>
+                
+                <!-- PS Plus -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="psplus-icon">
+                            <img class="placeholder-img" src="/assets/console_UI/PSPlus.png" alt="ps-plus">
+                        </div>
+                    </div>
+                    <div class="app-info">PlayStation Plus</div>
+                </div>
+                
+                <!-- Library -->
+                <div class="app-icon-wrapper">
+                    <div class="app-bg">
+                        <div class="app-icon" id="library-icon">
+                            <img class="placeholder-img" src="/assets/console_UI/library.png" alt="library">
+                        </div>
+                    </div>
+                    <div class="app-info">Bibliothèque</div>
+                </div>
+            </div>
+        </div>
+        
+        <audio id="game-music" loop preload="auto" style="display:none;"></audio>
+
+        <!-- Game Info Area -->
+        <div class="playable-area">
+            <img class="game-logo" src="/assets/apps/spiderManMilesMorales/logo.png" alt="Game Logo">
+            <p class="game-subtext">The worlds of Peter Parker and Spider-Man collide in an original action-packed story</p>
+            <div class="game-buttons">
+                <img src="assets/console_UI/play_game.png" width="250px" height="60px">
+                <img src="assets/console_UI/overflow_button.png" width="60px" height="60px">
+            </div>
+        </div>
+
+        <div id="notif-container"></div>
+
+    </div>
+
+    <script>
+    let games = [], currentApp = 0, movement = 0;
+    const appContainer = document.getElementById("app-container");
+    const timeEl = document.querySelector(".time");
+    const logoEl = document.querySelector(".game-logo");
+    const subtextEl = document.querySelector(".game-subtext");
+
+    const params = new URLSearchParams(window.location.search);
+    const BG_MUSIC = params.get('bg') === '1';
+
+    // met à jour l'horloge
+    function updateTime() {
+      const now = new Date();
+      timeEl.textContent = 
+        `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    }
+    updateTime(); 
+    setInterval(updateTime, 60000);
+
+    fetch("local_games.json")
+    .then(r => r.json())
+    .then(data => {
+        games = data;
+        currentApp = Math.floor(games.length / 2);
+        movement   = -130 * currentApp;
+        renderCards();
+        if (BG_MUSIC) {
+            preloadMusicUrls();
+        } else {
+            console.log("Background game music désactivée");
+        }
+    });
+
+    function preloadMusicUrls() {
+    games.forEach((g, i) => {
+        fetch(`/search_music/${encodeURIComponent(g.name)}`)
+        .then(r => r.json())
+        .then(({ mp3_url }) => {
+            games[i].mp3_url = mp3_url;
+        })
+        .catch(() => {
+            games[i].mp3_url = null;
+        });
+    });
+    }
+
+
+    let audioEnabled = false, scrollSfx, clickSfx, uiSfx, PSBackgroundAudio, GameBackgroundAudio;
+    function setupAudio() {
+      if (audioEnabled) return;
+      scrollSfx = new Audio('/assets/audio/scroll.mp3');
+      clickSfx  = new Audio('/assets/audio/selection.mp3');
+      uiSfx     = new Audio('/assets/audio/gui-sfx.mp3');
+      PSBackgroundAudio = new Audio('/assets/audio/background.wav');
+      PSBackgroundAudio.loop = true;
+      audioEnabled = true;
+      PSBackgroundAudio.play().catch(() => {});
+    }
+    window.onload = setupAudio;
+
+    function playSoundEffect(sound) {
+      if (!audioEnabled) setupAudio();
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    }
+
+    function renderCards() {
+      appContainer.innerHTML = "";
+      games.forEach((g, i) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "app-icon-wrapper";
+
+        const bg = document.createElement("div");
+        bg.className = "app-bg" + (i === currentApp ? " active" : "");
+
+        const icon = document.createElement("div");
+        icon.className = "app-icon";
+        const img = document.createElement("img");
+        img.className = "placeholder-img";
+        img.src = `https://steamcdn-a.akamaihd.net/steam/apps/${g.appid}/library_600x900_2x.jpg`;
+        img.alt = g.name;
+        img.onerror = () => img.src = "/assets/console_UI/Generic Tile.png";
+        icon.appendChild(img);
+        bg.appendChild(icon);
+
+        const info = document.createElement("div");
+        info.className = "app-info";
+        const typeImg = document.createElement("img");
+        typeImg.src = "/assets/apps/appType/ps5.png";
+        typeImg.width = 60; typeImg.height = 25; typeImg.style.paddingRight = "10px";
+        info.append(typeImg, ` ${g.name}`);
+
+        wrapper.append(bg, info);
+        wrapper.addEventListener('click', () => {
+          setupAudio();
+          selectApp(i);
+          playSoundEffect(scrollSfx);
+        });
+        appContainer.appendChild(wrapper);
+      });
+
+      appContainer.style.transform = `translateX(${movement}px)`;
+      updateGameInfo();
+    }
+
+    function updateGameInfo() {
+      const g = games[currentApp];
+      if (!g) return;
+      document.querySelector(".game-logo").src = 
+        `https://steamcdn-a.akamaihd.net/steam/apps/${g.appid}/logo.png`;
+      subtextEl.textContent = g.game_description;
+
+      const bgDiv = document.getElementById("bg-1");
+      bgDiv.style.opacity = 0;
+      setTimeout(() => {
+        bgDiv.style.backgroundImage = 
+          `url(https://steamcdn-a.akamaihd.net/steam/apps/${g.appid}/library_hero.jpg)`;
+        bgDiv.style.opacity = 1;
+      }, 500);
+    }
+
+    let ytPlayer, localAudio;
+
+    function initPlayers() {
+        ytPlayer    = document.createElement('iframe');
+        ytPlayer.id = 'yt-theme';
+        ytPlayer.style = 'display:none;width:0;height:0;border:0';
+        ytPlayer.allow = 'autoplay';
+        document.body.appendChild(ytPlayer);
+
+        localAudio = document.getElementById('game-music');
+        if (!localAudio) {
+            localAudio = document.createElement('audio');
+            localAudio.id = 'game-music';
+            localAudio.loop = true;
+            localAudio.style.display = 'none';
+            document.body.appendChild(localAudio);
+        }
+    }
+    initPlayers();
+
+
+    async function playGameTheme(gameName) {
+        const audio = document.getElementById('game-music');
+        audio.pause();
+        audio.src = "";
+
+        const g = games[currentApp];
+        if (g.mp3_url) {
+            audio.src = g.mp3_url;
+            audio.volume = 0.75;
+            await audio.play(); 
+            PSBackgroundAudio.pause();
+            return;
+        } 
+    }
+
+    function selectApp(idx) {
+      document.querySelectorAll(".app-bg")[currentApp]?.classList.remove("active");
+      currentApp = idx;
+      document.querySelectorAll(".app-bg")[currentApp]?.classList.add("active");
+      movement = -130 * currentApp;
+      appContainer.style.transform = `translateX(${movement}px)`;
+      updateGameInfo();
+      if (BG_MUSIC) {
+            playGameTheme(games[currentApp].name);
+        } else {
+            console.log("Background game music désactivée");
+      }
+    }
+
+    document.querySelector(".ps5-ui").addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" && currentApp > 0) selectApp(currentApp - 1);
+      if (e.key === "ArrowRight" && currentApp < games.length - 1) selectApp(currentApp + 1);
+      if (e.key === "Enter") window.location.href = 
+        `steam://rungameid/${games[currentApp].appid}`;
+    });
+
+    document.querySelectorAll('.app-icon-wrapper').forEach((w,i) => {
+      w.addEventListener('dblclick', () => selectApp(i));
+    });
+
+    const THRESHOLD = 0.5;
+    let scrollInterval = null;
+    let lastDir = 0; // -1, 0, +1
+
+    function startScroll(dir) {
+        // dir = +1 pour droite, -1 pour gauche
+        if (scrollInterval || dir === 0) return;
+        lastDir = dir;
+        setupAudio();
+        selectApp(currentApp + dir);
+        playSoundEffect(scrollSfx);
+        scrollInterval = setInterval(() => {
+            setupAudio();
+            selectApp(currentApp + dir)
+            playSoundEffect(scrollSfx);
+        }, 150);
+    }
+
+    function stopScroll() {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+        lastDir = 0;
+    }
+
+    function scanGamepads() {
+        const gp = navigator.getGamepads()[0];
+        if (gp) {
+            if (gp.buttons[1].pressed) {
+                window.location.href = `steam://rungameid/${games[currentApp].appid}`;
+            }
+
+            // Lecture de l’axe X
+            const x = gp.axes[0];
+            if (x > THRESHOLD) {
+                startScroll(+1);
+            } else if (x < -THRESHOLD) {
+                startScroll(-1);
+            } else if (lastDir !== 0) {
+                stopScroll();
+            }
+    }
+    requestAnimationFrame(scanGamepads);
+    }
+
+    /**
+     * Affiche une notification style PS5.
+     * @param {Object} opts
+     * @param {string} [opts.iconClass]    – classe FontAwesome pour l’icône à gauche
+     * @param {string} [opts.iconUrl]      – URL pour l’icône à gauche
+     * @param {string} [opts.title]        – texte du titre
+     * @param {string} [opts.description]  – texte de la description
+     * @param {string} [opts.logoUrl]      – URL du logo PS (coin sup droit)
+     * @param {string} [opts.logoWidth]    – largeur CSS du logo (ex. "32px", "2rem")
+     * @param {string} [opts.logoHeight]   – hauteur CSS du logo
+     * @param {string} [opts.centerIconUrl]// pour mode icône seule
+     * @param {string} [opts.width]        – largeur CSS de la notif
+     * @param {string} [opts.height]       – hauteur CSS de la notif
+     * @param {string} [opts.margin]       – marge CSS de la notif
+     */
+    function showPSNotification(opts) {
+    const container = document.getElementById('notif-container');
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+
+    // Appliquer dimensions/marge custom
+    if (opts.width)  notif.style.width  = opts.width;
+    if (opts.height) notif.style.height = opts.height;
+    if (opts.margin) notif.style.margin = opts.margin;
+    if (opts.centerIconUrl) notif.classList.add('icon-only');
+
+    if (opts.centerIconUrl) {
+        // Mode icône seule (centre)
+        const img = document.createElement('img');
+        img.src = opts.centerIconUrl;
+        img.className = 'center-icon';
+        if (opts.logoWidth)  img.style.width  = opts.logoWidth;
+        if (opts.logoHeight) img.style.height = opts.logoHeight;
+        notif.appendChild(img);
+
+    } else {
+    // Icône à gauche
+    const iconWr = document.createElement('div');
+    iconWr.className = 'icon';
+    if (opts.iconUrl) {
+      const img = document.createElement('img');
+      img.src = opts.iconUrl;
+      if (opts.logoWidth)  img.style.width  = opts.logoWidth;
+      if (opts.logoHeight) img.style.height = opts.logoHeight;
+      iconWr.appendChild(img);
+    } else if (opts.iconClass) {
+      iconWr.innerHTML = `<i class="fas ${opts.iconClass}"></i>`;
+    }
+    notif.appendChild(iconWr);
+
+        // Texte
+        const text = document.createElement('div');
+        text.className = 'text-content';
+        if (opts.title)       text.innerHTML += `<div class="title">${opts.title}</div>`;
+        if (opts.description) text.innerHTML += `<div class="description">${opts.description}</div>`;
+        notif.appendChild(text);
+
+        // Logo PS
+        if (opts.logoUrl) {
+        const logo = document.createElement('img');
+        logo.src = opts.logoUrl;
+        logo.className = 'logo';
+        if (opts.logoWidth)  logo.style.width  = opts.logoWidth;
+        if (opts.logoHeight) logo.style.height = opts.logoHeight;
+        notif.appendChild(logo);
+        }
+    }
+
+    container.appendChild(notif);
+    notif.addEventListener('animationend', e => {
+        if (e.animationName === 'slideOut') container.removeChild(notif);
+    });
+    }
+
+
+    window.addEventListener("gamepadconnected", e => {
+        console.log(`Gamepad connected: ${e.gamepad.id}`);
+        setTimeout(() => {
+            showPSNotification({ centerIconUrl: 'icon-manette.png', width: '128px', height: '96px' , logoWidth: '70%', logoHeight: '70%'});
+        }, 2000);
+        requestAnimationFrame(scanGamepads);
+    });
+
+    window.addEventListener("load", () => document.querySelector(".ps5-ui").focus());
+      </script>
+</body>
+</html>    

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation de Lancement PS5</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            background-color: #000;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #playstation-logo {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1; /* ← ici, pas 0 ! */
+            transition: opacity 0.5s ease-out;
+            z-index: 0;
+        }
+
+        
+        .background-video.active {
+            opacity: 1;
+        }
+
+        #warning-screen {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            text-align: center;
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        #warning-screen h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        #warning-screen p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #user-profiles {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            width: 80%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #user-profiles h2 {
+            margin-bottom: 40px;
+            font-size: 2rem;
+        }
+
+        .profile {
+            background: linear-gradient(45deg, #0072ce, #00a4e4);
+            border-radius: 15px;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .profile:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+        }
+
+        /* Classes pour les animations */
+        .fade-in {
+            opacity: 1 !important;
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+        }
+
+        /* Animation de pulsation du logo */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Ondes sonores autour du logo */
+        .wave-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .wave {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        @keyframes wave-animation {
+            0% {
+                width: 30%;
+                height: 30%;
+                opacity: 0.8;
+            }
+            100% {
+                width: 90%;
+                height: 90%;
+                opacity: 0;
+            }
+        }
+
+        /* Effet de démarrage */
+        @keyframes startup-glow {
+            0% { box-shadow: 0 0 5px #0072ce; }
+            50% { box-shadow: 0 0 30px #00a4e4; }
+            100% { box-shadow: 0 0 5px #0072ce; }
+        }
+
+        .startup-glow {
+            animation: startup-glow 2s infinite;
+        }
+
+        /* Pour les effets de parallaxe */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <video id="default-bg-video" class="background-video" muted playsinline>
+            <source id="video-source" src="assets/video/LoginScreen.mp4" type="video/mp4">
+        </video>           
+
+        <!-- Logo PlayStation -->
+        <img src="assets/console_UI/Nexus Logo.png" width="250px" height="250px" id="playstation-logo"/>
+
+        <!-- Profils utilisateur -->
+        <div id="user-profiles">
+            <h2>Qui utilise cette PS5 ?</h2>
+            <div class="profile" onclick="redirectToIndex()">
+                <div class="profile-icon">👤</div>
+                <div class="profile-name">User</div>
+            </div>
+        </div>
+
+        <!-- Particules d'arrière-plan -->
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById("default-bg-video");
+    const source = document.getElementById("video-source");
+
+    // Le reste de ton animation custom
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.width = Math.random() * 4 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.opacity = Math.random() * 0.5;
+        particlesContainer.appendChild(particle);
+    }
+
+    setTimeout(() => {
+        document.getElementById('playstation-logo').classList.add('fade-in');
+    }, 1000);
+
+    setTimeout(() => {
+        document.getElementById('playstation-logo').classList.remove('fade-in');
+        document.getElementById('playstation-logo').classList.add('fade-out');
+
+        video.play().catch(() => console.log("Autoplay bloqué"));
+
+        new Audio('assets/video/LoginScreenFull.mp4').play();
+
+        video.onended = () => {
+            source.src = "assets/video/background.mp4";
+            video.load();
+            video.loop = true;
+            video.play();
+        };
+    }, 10000);
+
+    setTimeout(() => {
+        setTimeout(() => {
+            document.getElementById('user-profiles').classList.add('fade-in');
+            document.querySelector('.profile').classList.add('startup-glow');
+        }, 1000);
+    }, 15000);
+});
+
+function redirectToIndex() {
+    new Audio('assets/audio/selection.mp3').play();
+    document.getElementById('user-profiles').classList.remove('fade-in');
+    document.getElementById('user-profiles').classList.add('fade-out');
+    document.getElementById('particles').classList.add('fade-out');
+    setTimeout(() => {
+        window.location.href = 'http://localhost:8000/index.html';
+    }, 900);
+}
+
+    </script>
+</body>
+</html>
